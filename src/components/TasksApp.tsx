@@ -59,6 +59,13 @@ const TasksApp: React.FC = () => {
     setTasks(updatedTasks as Task[]);
   };
 
+  const onDeleteTask = (task: Task) => {
+    //delete task
+    const updatedTasks = tasks.filter((item) => item !== task);
+    //console.log(updatedTasks);
+    setTasks(updatedTasks as Task[]);
+  };
+
   return (
     <>
       <AddTask text={text} onChange={onTextChange} onAddTask={onAddTask} />
@@ -70,6 +77,7 @@ const TasksApp: React.FC = () => {
                 task={task}
                 onCompleteTask={onCompleteTask}
                 onEditTask={onEditTask}
+                onDeleteTask={onDeleteTask}
                 key={task.id}
               />
             )
@@ -111,6 +119,7 @@ const TasksApp: React.FC = () => {
                   task={task}
                   onCompleteTask={onCompleteTask}
                   onEditTask={onEditTask}
+                  onDeleteTask={onDeleteTask}
                   key={task.id}
                 />
               )

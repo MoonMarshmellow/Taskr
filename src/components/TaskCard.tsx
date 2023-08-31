@@ -1,36 +1,49 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Task } from "../types/types";
 import {
+  Button,
   Flex,
   Icon,
   Input,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
   Spacer,
   Text,
+  useDisclosure,
 } from "@chakra-ui/react";
-import { GiHamburgerMenu } from "react-icons/gi";
 import { BiSolidPencil } from "react-icons/bi";
+import { BsFillTrashFill } from "react-icons/bs";
 
 type TaskCardProps = {
   task: Task;
   onCompleteTask: (task: Task) => void;
   onEditTask: (task: Task, text: string) => void;
+  onDeleteTask: (task: Task) => void;
 };
 
 const TaskCard: React.FC<TaskCardProps> = ({
   task,
   onCompleteTask,
   onEditTask,
+  onDeleteTask,
 }) => {
   const [edit, setEdit] = useState(false);
   const [text, setText] = useState("");
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     const key = e.key;
     if (key == "Enter") {
-      onEditTask(task, text);
+      if (text) {
+        onEditTask(task, text);
+      } else {
+        onEditTask(task, task.body);
+      }
       setEdit(false);
     }
   };
@@ -38,6 +51,15 @@ const TaskCard: React.FC<TaskCardProps> = ({
   const onTextChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setText(event.target.value);
   };
+
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (edit) {
+      // @ts-ignore
+      inputRef.current.focus();
+    }
+  }, [edit]);
 
   return (
     <>
@@ -53,10 +75,10 @@ const TaskCard: React.FC<TaskCardProps> = ({
         }}
         cursor="pointer"
         color="white"
-        // transition={"all .25s ease"}
-        // _hover={{
-        //   transform: "scale(1.03)",
-        // }}
+        transition={"all .1s ease"}
+        _hover={{
+          transform: "scale(1.03)",
+        }}
         align="center"
       >
         {!edit ? (
@@ -70,39 +92,72 @@ const TaskCard: React.FC<TaskCardProps> = ({
             defaultValue={task.body}
             onKeyDown={(e) => handleKeyPress(e)}
             onChange={onTextChange}
+            ref={inputRef}
           />
         )}
 
         <Spacer />
-        <Menu>
-          <MenuButton
-            bgColor="none"
-            color="brand.100"
-            fontWeight={700}
-            onClick={(event) => event?.stopPropagation()}
-            alignItems="center"
-          >
-            <Icon as={GiHamburgerMenu} fontWeight={700}></Icon>
-          </MenuButton>
-          <MenuList
+        <Icon
+          as={BiSolidPencil}
+          transition={"all .1s ease"}
+          _hover={{
+            transform: "scale(1.3)",
+          }}
+          onClick={(event) => {
+            event?.stopPropagation();
+            setEdit(!edit);
+          }}
+        />
+        <Icon
+          as={BsFillTrashFill}
+          onClick={(e) => {
+            e.stopPropagation();
+            onOpen();
+          }}
+          transition={"all .1s ease"}
+          _hover={{
+            transform: "scale(1.3)",
+          }}
+          ml={2}
+        />
+
+        <Modal isOpen={isOpen} onClose={onClose}>
+          <ModalOverlay />
+          <ModalContent
+            textAlign="center"
+            justifyContent="center"
             bgColor="brand.200"
-            border="1px"
-            borderColor="#3B3D3D"
-            width="200px"
+            color="white"
           >
-            <MenuItem
-              icon={<BiSolidPencil />}
-              bgColor="brand.200"
-              _hover={{ bgColor: "#3B3D3D" }}
-              onClick={(event) => {
-                event?.stopPropagation();
-                setEdit(!edit);
-              }}
-            >
-              Edit
-            </MenuItem>
-          </MenuList>
-        </Menu>
+            <ModalHeader>Delete Task</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody>
+              This is not the same as completing a task. To complete a task
+              click on it.
+            </ModalBody>
+
+            <ModalFooter justifyContent="center">
+              <Button
+                bgColor="brand.200"
+                color="white"
+                _hover={{ bgColor: "gray.200", color: "gray.800" }}
+                mr={3}
+                onClick={onClose}
+              >
+                Cancel
+              </Button>
+              <Button
+                bgColor="red.500"
+                onClick={() => {
+                  onDeleteTask(task);
+                  onClose();
+                }}
+              >
+                Delete
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
       </Flex>
     </>
   );
