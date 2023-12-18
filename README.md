@@ -2,6 +2,7 @@
 
 ## A simple todo app built in React with Typescript
 
+I made Taskr to learn more about React and help others learn as well. If you would like to contribute simply raise a pull request. 
 Taskr is a simple todo application that allows users to manage their tasks. Features include:
 
 - Adding tasks.
